@@ -1,0 +1,13 @@
+
+-- Kai
+
+./generate.rb -p weekly -d 1 -f "src:2", ~/Documents/Programming/Compilers/Kai2.8/
+
+
+-- LLVM
+
+./generate.rb -p monthly -d 1 -f "lib:3,lib/System:2", ~/Documents/Programming/Compilers/Kai2.8/ext/llvm/
+
+-- Fixing git history
+
+git filter-branch --env-filter 'export GIT_AUTHOR_EMAIL="samuel.williams@oriontransfer.co.nz";GIT_AUTHOR_NAME="Samuel Williams"' 

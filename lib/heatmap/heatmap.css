@@ -1,0 +1,94 @@
+body {
+	font-family: monospace;
+}
+
+.heatmap {
+	margin: 0.5em;
+	
+	background-image: url(sidebar.png);
+}
+
+table.heatmap-summary {
+	width: 100%;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	text-align: center;
+}
+
+.heatmap ul {
+	list-style: none;
+	
+	padding: 0;
+	margin: 0;
+}
+
+.heatmap li {
+	height: 30px;
+	line-height: 30px;
+}
+
+.heatmap .paths li.dates {
+	background-color: #ccc;
+}
+
+.heatmap li.dates .box, .heatmap .box.temperature {
+	-webkit-box-shadow: 3px 3px 3px #ddd;
+	-moz-box-shadow: 3px 3px 3px #ddd;
+}
+
+.heatmap .date {
+	background-color: #999;
+	font-weight: bold;
+}
+
+.heatmap li:nth-child(even) .box {
+	-background-color: #f0f0ff;
+}
+
+.heatmap .paths li:nth-child(even) {
+	-background-color: #f0f0ff;
+}
+
+.heatmap .box {
+	text-align: center;
+	display: inline-block;
+	
+	vertical-align: top;
+	
+	font-size: 0.5em;
+	
+	width: 30px;
+	height: 30px;
+}
+
+.heatmap .hover .box, 
+.heatmap ul.paths li.hover {
+	background-image: url(hover.png);
+}
+
+.heatmap .paths {
+	float: left;
+	background-image: url(sidebar.png);
+	
+	-webkit-box-shadow: 3px 3px 3px #ddd;
+	-moz-box-shadow: 3px 3px 3px #ddd;
+}
+
+.heatmap .paths li {
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+}
+
+.heatmap .data {
+	cursor: pointer;
+}
+
+.heatmap .data {
+	overflow-y: hidden;
+	overflow-x: auto;
+	white-space: nowrap;
+}
+
+.heatmap .data li {
+	position: relative;
+}

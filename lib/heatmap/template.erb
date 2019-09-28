@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<%
+		periods = heatmap.period.between(heatmap.first, heatmap.last)
+		aggregates = heatmap.aggregates.to_a.sort
+		@max = heatmap.max
+		
+		def ramp(x)
+			i = x.to_f / @max
+			j = Math::sqrt(i)
+			k = i ** 2
+			# return interpolate(i, [j], [k])[0]
+			return i
+		end
+		
+		def interpolate(t, x, y)
+			r = x.dup
+			r.size.times{|i| r[i] = (x[i].to_f * (1.0 - t)) + (y[i].to_f * t)}
+			
+			return r
+		end
+		
+		# t between 0...1
+		def temperature(t, colors)
+			p = (t.to_f * colors.size)
+			
+			if (p <= 0)
+				return colors.first
+			end
+			
+			if (p+1 >= colors.size)
+				return colors.last
+			end
+			
+			return interpolate(p - p.floor, colors[p.floor], colors[p.floor+1])
+		end
+		
+		def hexcolor(c)
+			'#' + c.collect{|k| k.to_i.to_s(16).rjust(2, '0')}.join
+		end
+		
+		def background_color(size)
+			temp = temperature(ramp(size.to_f), [
+				[0xFF, 0xFF, 0xFF],
+				#[0x04, 0x05, 0x57],
+				
+				#[0x17, 0xD3, 0xFF],
+				[0x4D, 0x85, 0xFF],
+				
+				# [0x02, 0xB1, 0x50], # Green
+				
+				#[0xF2, 0xFD, 0xA0], # Yellow
+				[0xF4, 0xFB, 0x13],
+				
+				[255, 0x05, 0x05],	# Red
+				# [255, 200, 200]
+			])
+			
+			return hexcolor(temp)
+		end
+		
+		def summarize(list, n)
+			return list.first(n).join(' ') + (list.size > n ? '...' : '')
+		end
+	%>
+	
+		<link rel="stylesheet" href="heatmap.css" type="text/css" media="screen" />
+		<script src="jquery-1.4.2.min.js" type="text/javascript"></script>
+		
+		<script src="tipsy/src/javascripts/jquery.tipsy.js" type="text/javascript"></script>
+		<link rel="stylesheet" href="tipsy/src/stylesheets/tipsy.css" type="text/css" media="screen" />
+		
+		<script src="jquery.drag-scrollable.js" type="text/javascript"></script>
+		
+		<script type="text/javascript" charset="utf-8">
+			jQuery(function(){
+				$('.heatmap').each(function() {
+					var paths = $('ul.paths li', this).slice(1);
+					var data = $('ul.data li', this).slice(1);
+					
+					paths.each(function(i) {
+						var row = data.eq(i);
+						
+						$(this).bind('mouseover', function() {
+							$(this).addClass('hover');
+							row.addClass('hover');
+						});
+						
+						$(this).bind('mouseout', function() {
+							$(this).removeClass('hover');
+							row.removeClass('hover');
+						});
+					});
+
+					data.each(function(i) {
+						var row = paths.eq(i);
+						
+						$(this).bind('mouseover', function() {
+							$(this).addClass('hover');
+							row.addClass('hover');
+						});
+						
+						$(this).bind('mouseout', function() {
+							$(this).removeClass('hover');
+							row.removeClass('hover');
+						});
+					});
+				});
+				
+				tipsy_options = {
+					gravity: function() {
+						return $(this).offset().left > ($(document).scrollLeft() + $(window).width() / 2) ? 'ne' : 'nw';
+				    },
+					delayIn: 10,
+				};
+				
+				$('a.temperature', this).tipsy(tipsy_options);
+				$('a.date', this).tipsy(tipsy_options);
+				
+				$('.data', this).dragscrollable({
+					dragSelector: '>*'
+				});
+			});
+		</script>
+		
+		<style type="text/css" media="screen">
+			.tipsy-inner { max-width: 500px; }
+		</style>
+	</head>
+	<body>
+		<h1>Heat Map : <%= title %></h1>
+		
+		<%
+			total_lines = heatmap.lines_added - heatmap.lines_removed
+			
+			$stderr.puts "Generating Summary..."
+		%>
+		
+		<table class="heatmap-summary">
+			<thead>
+				<tr>
+					<th>From</th><th>To</th><th>Total Commits</th><th>Total Files</th><th>Total Lines</th><th>Total Contributors</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><%= heatmap.first.strftime("%m/%d/%Y") %></td>
+					<td><%= heatmap.last.strftime("%m/%d/%Y") %></td>
+					<td><%= revisions.size %></td>
+					<td><%= heatmap.files.size %></td>
+					<td><%= total_lines %> (+<%= heatmap.lines_added %>/-<%= heatmap.lines_removed %>)</td>
+					<td><%= heatmap.authors.size %></td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<div class="heatmap">
+			<ul class="paths">
+				<li class="dates"><%= heatmap.period.name %> starting from <%= heatmap.first.strftime("%m/%d/%Y") %></li>
+				<% aggregates.each do |dir, sorted| %>
+				<li><%= dir %></li>
+				<% end %>
+			</ul>
+			
+			<ul class="data">
+				<li class="dates"><% periods.each_with_index do |start, i| 
+				%><a class="date box" title="<%= start.strftime("%m/%d/%Y") %>"><%= i+1 %></a><% 
+				end %></li>
+				
+				<% aggregates.each do |dir, sorted| %>
+					<% $stderr.puts "Generating directory #{dir.dump}..." %>
+				<li class="stats">
+					<% 
+					periods.each do |start| 
+						revisions = sorted.delete(start)
+						
+						if revisions
+							lines_added = revisions.inject(0){|total,commit| total + commit.lines_added}
+							lines_removed = revisions.inject(0){|total,commit| total + commit.lines_removed}
+							lines_changed = lines_added - lines_removed
+							
+							filenames = WeightedMap.new
+							revisions.each{|commit| filenames.insert(commit.changes.keys)}
+							filenames = filenames.sorted.collect{|name,weight| name}
+							
+							files = revisions.inject(0){|total,commit| total + commit.changes.size}
+							
+							total_project = Set.new
+							revisions.each{|commit| total_project += commit.changes.keys}
+							
+							authors = Set.new(revisions.collect{|commit| commit[:author]}).size
+							
+							# +#{lines_added}/-#{lines_removed}
+							title = "Commits: #{revisions.size}/#{authors}, Touched: #{files}/#{total_project.size}, Lines: +#{lines_added}/-#{lines_removed}"
+							
+							title += ", Files: #{summarize(filenames, 6)}"
+							
+							m = heatmap.magnitude(revisions)
+					%><a class="temperature box" style="background-color: <%= background_color(m) %>" title="<%= title %>"><%= m.to_i %></a><%
+						else
+					%><div class="box"></div><%
+						end
+					end
+					%>
+				</li>
+				<% end %>
+				
+			</ul>
+		</div>
+	</body>
+</html>

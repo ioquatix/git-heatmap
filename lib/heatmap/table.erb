@@ -1,0 +1,57 @@
+<style type="text/css" media="screen">
+	body {
+		font-family: monospace;
+	}
+
+	.heatmap {
+	}
+
+	.heatmap thead td {
+		text-align: center;
+		font-size: 0.6em;
+	}
+
+	.heatmap .hot {
+		font-size: 0.8em;
+		width: 20px;
+		height: 20px;
+
+		text-align: center;
+	}
+</style>
+
+<table class="heatmap">
+	<thead>
+		<tr>
+			<th>Directory</th>
+			<% periods.each do |start| %>
+			<td><%= start.strftime("%m/%d") %></td>
+			<% end %>
+		</tr>
+	</thead>
+	<tbody>
+		<% heatmap.aggregates.to_a.sort.each do |dir, sorted| %>
+		<tr>
+			<th><%= dir %></th>
+			<% 
+			periods.each do |start| 
+				changes = sorted[start] || []
+			%>
+			<td><div class="hot" style="background-color: <%= background_color(changes.size) %>"><%= changes.size %></div></td>
+			<%
+			end
+			%>
+		</tr>
+		<% end %>
+	</tbody>
+	<tfoot>
+		<tr>
+			<th>Key</th>
+			<% periods.size.times do |k|
+				d = (k.to_f / periods.size.to_f) * @max
+			%>
+			<td><div class="hot" style="background-color: <%= background_color(d) %>"><%= d.floor %></div></td>
+			<% end %>
+		</tr>
+	</tfoot>
+</table>

@@ -62,6 +62,10 @@ table.summary {
 	flex-shrink: 0;
 }
 
+.heatmap ul.data li:hover {
+	background-color: rgba(0, 0, 0, 0.1);
+}
+
 .heatmap .hover .box, .heatmap ul.paths li.hover {
 	background-color: rgba(0, 0, 0, 0.2);
 }

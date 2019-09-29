@@ -27,9 +27,9 @@
 				<li class="stats">
 					<?r commits.each_period do |period| ?>
 						<?r if period_commits = aggregate.periods[period]
-							size = period_commits.size
+							size = aggregate.churn[period]
 						?>
-						<a class="temperature box" style="background-color: #{background_color(size)}" title="#{period_commits.collect(&:oid).join(', ')}">#{size}</a>
+						<a class="temperature box" style="background-color: #{background_color(size)}" title="+#{aggregate.additions[period]}/-#{aggregate.deletions[period]} #{period_commits.collect(&:oid).join(', ')}">#{size}</a>
 						<?r else ?>
 						<div class="box"></div>
 						<?r end ?>

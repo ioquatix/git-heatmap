@@ -33,6 +33,10 @@ module Git
 				@latest_commit_at = nil
 				
 				@maximum = 0
+				
+				@additions = Hash.new{|h,k| h[k] = 0}
+				@deletions = Hash.new{|h,k| h[k] = 0}
+				@churn = Hash.new{|h,k| h[k] = 0}
 			end
 			
 			attr :commits
@@ -41,25 +45,38 @@ module Git
 			attr :earliest_commit_at
 			attr :latest_commit_at
 			
+			attr :additions
+			attr :deletions
+			attr :churn
+			
 			def size
 				@commits.size
 			end
 			
 			attr :maximum
 			
-			def << commit
-				return if @commits.include?(commit.oid)
-				
-				@commits[commit.oid] = commit
-				
+			def add(commit, patch)
 				author = commit.author
 				time = author[:time]
 				key = @filter.key(time)
-				commits = (@periods[key] ||= [])
-				commits << commit
 				
-				if commits.size > @maximum
-					@maximum = commits.size
+				unless @commits.include?(commit.oid)
+					@commits[commit.oid] = commit
+					
+					commits = (@periods[key] ||= [])
+					commits << commit
+				end
+				
+				@additions[key] += patch.additions
+				@deletions[key] += patch.deletions
+				
+				churn = patch.additions + patch.deletions.abs
+				@churn[key] += churn
+				
+				total_churn = @churn[key]
+				
+				if total_churn > @maximum
+					@maximum = total_churn
 				end
 				
 				if @earliest_commit_at.nil? or time < @earliest_commit_at
@@ -114,9 +131,10 @@ module Git
 				
 				if parent = commit.parents.first
 					# Documentation seems to imply this shouldn't be needed.
-					diff = commit.diff(commit.parents.first.tree)
+					diff = parent.diff(commit.tree)
 				else
-					diff = commit.diff
+					empty_tree = Rugged::Tree.empty(commit.tree.repo)
+					diff = empty_tree.diff(commit.tree)
 				end
 				
 				author = commit.author
@@ -140,7 +158,7 @@ module Git
 					parts.pop # Remove file name
 					root = parts[0...@depth]
 					
-					@directories[root] << commit
+					@directories[root].add(commit, patch)
 				end
 			end
 			

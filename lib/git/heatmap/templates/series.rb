@@ -40,12 +40,13 @@ module Git
 				attr :commits
 				attr :title
 				
-				def ramp(x, max = commits.maximum)
-					i = x.to_f / max
-					# j = Math::sqrt(i)
-					# k = i ** 2
-					# return interpolate(i, [j], [k])[0]
-					return i
+				def ramp(i, max = commits.maximum)
+					x = i.to_f / max
+					
+					# Smoothstep:
+					# return (3*x*x - 2*x*x*x)
+					
+					return Math::sqrt(x)
 				end
 				
 				def interpolate(t, x, y)

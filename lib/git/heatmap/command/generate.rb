@@ -75,9 +75,15 @@ module Git
 					commits = Commits.new(filter: self.period, depth: @options[:depth])
 					
 					@paths.each do |path|
-						repository = Rugged::Repository.discover(path)
+						Console.logger.info "Loading commits from #{path}..."
 						
-						commits.add(repository)
+						begin
+							repository = Rugged::Repository.discover(path)
+						
+							commits.add(repository)
+						rescue
+							Console.logger.error($!)
+						end
 					end
 					
 					File.write(output_path, template(commits).call)

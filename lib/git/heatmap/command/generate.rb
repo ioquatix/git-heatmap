@@ -43,7 +43,7 @@ module Git
 				
 				options do
 					option "--template <path>", "The template file to use.", default: "series"
-					option "--period <name>", "The period to use, one of: #{PERIODS.keys.join(', ')}.", default: "daily"
+					option "--period <name>", "The period to use, one of: #{PERIODS.keys.join(', ')}.", default: "weekly"
 					option "--depth <integer>", "Specify the depth of aggregation (depth of top level directories).", type: Integer, default: 2
 					
 					option "--output <path>", "The output path to use."

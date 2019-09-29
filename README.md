@@ -2,6 +2,8 @@
 
 Visualise git history over time.
 
+![A screenshot of the visualisation](Screenshot.png)
+
 [![Build Status](https://secure.travis-ci.org/ioquatix/git-heatmap.svg)](http://travis-ci.org/ioquatix/git-heatmap)
 
 ## Installation

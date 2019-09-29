@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<base href="file://#{__dir__}/" />
+		
+		<link rel="stylesheet" type="text/css" href="main.css" />
+	</head>
+	<body>
+		<header>Git Heatmap for #{self.title}</header>
+		
+		<section class="heatmap">
+			<ul class="paths">
+				<li class="dates">#{commits.filter.name} starting from #{commits.earliest_commit_at.strftime("%m/%d/%Y")}</li>
+				<?r commits.each_directory do |directory, aggregate| ?>
+					<li>#{directory.join("/")}</li>
+				<?r end ?>
+			</ul>
+			
+			<ul class="data">
+				<li class="dates">
+					<?r commits.each_period.with_index do |period, index| ?>
+						<a class="date box" title="#{period.strftime("%m/%d/%Y")}">#{index+1}</a>
+					<?r end ?>
+				</li>
+				
+				<?r commits.each_directory do |directory, aggregate| ?>
+				<li class="stats">
+					<?r commits.each_period do |period| ?>
+						<?r if period_commits = aggregate.periods[period]
+							size = period_commits.size
+						?>
+						<a class="temperature box" style="background-color: #{background_color(size)}" title="#{period_commits.collect(&:oid).join(', ')}">#{size}</a>
+						<?r else ?>
+						<div class="box"></div>
+						<?r end ?>
+					<?r end ?>
+				</li>
+				<?r end ?>
+			</ul>
+		</section>
+	</body>
+</html>

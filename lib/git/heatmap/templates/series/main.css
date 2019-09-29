@@ -1,0 +1,92 @@
+body {
+	font-family: monospace;
+	
+	--box-size: 2rem;
+}
+
+body header {
+	font-size: 200%;
+}
+
+ul li {
+	display: flex;
+}
+
+.heatmap {
+	margin: 0.5em;
+	
+	background-image: url(background.png);
+}
+
+table.summary {
+	width: 100%;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	text-align: center;
+}
+
+.heatmap ul {
+	list-style: none;
+	
+	padding: 0;
+	margin: 0;
+}
+
+.heatmap li {
+	height: var(--box-size);
+	line-height: var(--box-size);
+}
+
+.heatmap .paths li.dates {
+	background-color: #ccc;
+}
+
+.heatmap li.dates .box, .heatmap .box.temperature, .heatmap .paths {
+	box-shadow: 0.3rem 0.3rem 0.3rem rgba(0, 0, 0, 0.2);
+}
+
+.heatmap .date {
+	background-color: #999;
+	font-weight: bold;
+}
+
+.heatmap .box {
+	text-align: center;
+	display: inline-block;
+	
+	vertical-align: top;
+	
+	width: var(--box-size);
+	height: var(--box-size);
+	
+	flex-shrink: 0;
+}
+
+.heatmap .hover .box, .heatmap ul.paths li.hover {
+	background-color: rgba(0, 0, 0, 0.2);
+}
+
+.heatmap .paths {
+	float: left;
+	background-image: url(background.png);
+}
+
+.heatmap .paths li {
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+}
+
+.heatmap .data {
+	cursor: pointer;
+}
+
+.heatmap .data {
+	white-space: nowrap;
+	
+	overflow-y: auto;
+	overflow-x: visible;
+}
+
+.heatmap .data li {
+	position: relative;
+}
